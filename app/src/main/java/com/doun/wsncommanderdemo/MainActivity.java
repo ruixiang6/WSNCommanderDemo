@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> textureIndexs = new ArrayList<Integer>();
         textureIndexs.add(1);
         textureIndexs.add(3);
-        textureIndexs.add(3);
+        textureIndexs.add(2);
         OverlayOptions ooPolyline11 = new PolylineOptions().width(20)
                 .points(points11)
                 .dottedLine(true)
