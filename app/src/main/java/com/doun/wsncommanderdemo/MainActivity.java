@@ -2,11 +2,14 @@ package com.doun.wsncommanderdemo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,10 +24,13 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.CircleOptions;
 import com.baidu.mapapi.map.DotOptions;
+import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolygonOptions;
@@ -51,6 +57,17 @@ public class MainActivity extends AppCompatActivity {
     Polyline mColorfulPolyline;
     // 纹理折线，点击时获取折线上点数及width
     Polyline mTexturePolyline;
+
+    private Marker mMarkerA;
+    private Marker mMarkerB;
+    private Marker mMarkerC;
+    private Marker mMarkerD;
+
+    BitmapDescriptor bdA = null;
+    BitmapDescriptor bdB = null;
+
+    private InfoWindow mInfoWindow;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +107,38 @@ public class MainActivity extends AppCompatActivity {
             requestLocation();
         }
 
+        // 初始化全局 bitmap 信息，不用时及时 recycle
+        bdA = BitmapDescriptorFactory.fromResource(R.drawable.icon_marka);
+        bdB = BitmapDescriptorFactory.fromResource(R.drawable.icon_markb);
+
+
+        baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(final Marker marker) {
+                Button button = new Button(getApplicationContext());
+                //button.setBackgroundResource(R.drawable.popup);
+                InfoWindow.OnInfoWindowClickListener listener = null;
+                if (marker == mMarkerA) {
+                    button.setText("ID：458\n频点：258K\n时隙：165\n经纬度：N31.3960 E121.2453");
+                } else if (marker == mMarkerB) {
+                    button.setText("ID：288\n频点：258K\n时隙：155\n经纬度：N31.4060 E121.2453");
+                } else if (marker == mMarkerC) {
+                    button.setText("ID：589\n频点：258K\n时隙：89\n经纬度：N31.3960 E121.2553");
+                } else if (marker == mMarkerD) {
+                    button.setText("ID：112\n频点：258K\n时隙：215\n经纬度：N31.3860 E121.2453");
+                }
+                button.setBackgroundColor( Color.argb(180,79,79,79) );
+                button.setWidth( 300 );
+                listener = new InfoWindow.OnInfoWindowClickListener() {
+                    public void onInfoWindowClick() {
+                        baiduMap.hideInfoWindow();
+                    }
+                };
+                LatLng ll = marker.getPosition();
+                mInfoWindow = new InfoWindow(BitmapDescriptorFactory.fromView(button), ll, -47, listener);
+                baiduMap.showInfoWindow(mInfoWindow);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -98,6 +147,10 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient.stop();
         mapView.onResume();
         baiduMap.setMyLocationEnabled(false);
+
+        // 回收 bitmap 资源
+        bdA.recycle();
+        bdB.recycle();
     }
 
     @Override
@@ -174,17 +227,10 @@ public class MainActivity extends AppCompatActivity {
         baiduMap.addOverlays(overlayList);
 
         // 添加多纹理分段的折线绘制
-
         List<BitmapDescriptor> textureList = new ArrayList<BitmapDescriptor>();
-        BitmapDescriptor mRedTexture = BitmapDescriptorFactory.fromAsset("icon_road_red_arrow.png");
-        BitmapDescriptor mGreenTexture = BitmapDescriptorFactory.fromAsset("icon_road_green_arrow.png");
-        BitmapDescriptor mYellowTexture = BitmapDescriptorFactory.fromAsset("icon_road_yellow_arrow.png");
         BitmapDescriptor mHalfRedTexture = BitmapDescriptorFactory.fromAsset("icon_road_halfred_arrow.png");
         BitmapDescriptor mHalfGreenTexture = BitmapDescriptorFactory.fromAsset("icon_road_halfgreen_arrow.png");
         BitmapDescriptor mHalfYellowTexture = BitmapDescriptorFactory.fromAsset("icon_road_halfyellow_arrow.png");
-        textureList.add(mRedTexture);
-        textureList.add(mGreenTexture);
-        textureList.add(mYellowTexture);
         textureList.add(mHalfRedTexture);
         textureList.add(mHalfGreenTexture);
         textureList.add(mHalfYellowTexture);
@@ -195,9 +241,9 @@ public class MainActivity extends AppCompatActivity {
         points11.add(p311);
         points11.add(p411);
         List<Integer> textureIndexs = new ArrayList<Integer>();
-        textureIndexs.add(4);
-        textureIndexs.add(4);
-        textureIndexs.add(5);
+        textureIndexs.add(1);
+        textureIndexs.add(1);
+        textureIndexs.add(2);
         OverlayOptions ooPolyline11 = new PolylineOptions().width(20)
                 .points(points11)
                 .dottedLine(true)
@@ -230,6 +276,36 @@ public class MainActivity extends AppCompatActivity {
         OverlayOptions ooPolyline44 = new PolylineOptions().width(20)
                 .points(points44).dottedLine(true).customTexture(mHalfRedTexture);
         mTexturePolyline = (Polyline) baiduMap.addOverlay(ooPolyline44);
+
+
+        //增加图标
+        MarkerOptions ooA = new MarkerOptions().position(p111).icon(bdA).zIndex(9).draggable(true);
+        // 掉下动画
+        //ooA.animateType(MarkerOptions.MarkerAnimateType.grow);
+        mMarkerA = (Marker) (baiduMap.addOverlay(ooA));
+        MarkerOptions ooB = new MarkerOptions().position(p211).icon(bdA).zIndex(9).draggable(true);
+        mMarkerB = (Marker) (baiduMap.addOverlay(ooB));
+        MarkerOptions ooC = new MarkerOptions().position(p311).icon(bdB).zIndex(9).draggable(true);
+        mMarkerC = (Marker) (baiduMap.addOverlay(ooC));
+        MarkerOptions ooD = new MarkerOptions().position(p411).icon(bdB).zIndex(9).draggable(true);
+        mMarkerD = (Marker) (baiduMap.addOverlay(ooD));
+
+
+        baiduMap.setOnMarkerDragListener(new BaiduMap.OnMarkerDragListener() {
+            public void onMarkerDrag(Marker marker) {
+            }
+
+            public void onMarkerDragEnd(Marker marker) {
+                Toast.makeText(
+                        MainActivity.this,
+                        "拖拽结束，新位置：" + marker.getPosition().latitude + ", "
+                                + marker.getPosition().longitude,
+                        Toast.LENGTH_LONG).show();
+            }
+
+            public void onMarkerDragStart(Marker marker) {
+            }
+        });
 
 
 //        // 添加普通折线绘制
@@ -311,6 +387,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 清除所有Overlay
+     *
+     * @param view
+     */
+    public void clearOverlay(View view) {
+        baiduMap.clear();
+        mMarkerA = null;
+        mMarkerB = null;
+        mMarkerC = null;
+        mMarkerD = null;
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -334,8 +422,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class MyLocationListener implements BDLocationListener{
+        BDLocation lastlocation = null;
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
+            if (lastlocation != null
+                    && lastlocation.getLatitude() == bdLocation.getLatitude()
+                    && lastlocation.getLongitude() == bdLocation.getLongitude()){
+                return;
+            }else{
+                lastlocation = bdLocation;
+            }
+
             //移动地图
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation
                     ||bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) {
@@ -346,11 +443,11 @@ public class MainActivity extends AppCompatActivity {
             StringBuilder currentPosition = new StringBuilder();
             currentPosition.append("纬度：").append(bdLocation.getLatitude()).append(" ");
             currentPosition.append("经度：").append(bdLocation.getLongitude()).append("\n");
-            currentPosition.append("国家：").append(bdLocation.getCountry()).append(" ");
-            currentPosition.append("省：").append(bdLocation.getProvince()).append(" ");
-            currentPosition.append("市：").append(bdLocation.getCity()).append(" ");
-            currentPosition.append("区：").append(bdLocation.getDistrict()).append(" ");
-            currentPosition.append("街道：").append(bdLocation.getStreet()).append("\n");
+            currentPosition.append(bdLocation.getCountry()).append(" ");
+            currentPosition.append(bdLocation.getProvince()).append(" ");
+            currentPosition.append(bdLocation.getCity()).append(" ");
+            currentPosition.append(bdLocation.getDistrict()).append(" ");
+            currentPosition.append(bdLocation.getStreet()).append("\n");
 
             currentPosition.append("定位方式：");
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation) {
@@ -361,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
             positionTest.setText(currentPosition);
 
             //添加折线
-            baiduMap.clear();
+            clearOverlay(null);
             addCustomElementsDemo(bdLocation);
         }
     }
