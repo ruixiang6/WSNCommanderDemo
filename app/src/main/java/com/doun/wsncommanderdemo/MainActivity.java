@@ -1,8 +1,13 @@
 package com.doun.wsncommanderdemo;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,7 +45,11 @@ import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.map.TextOptions;
 import com.baidu.mapapi.model.LatLng;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -139,8 +148,98 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+//        Toast.makeText(getApplicationContext(), getLocalMacAddress(), Toast.LENGTH_SHORT).show();
+//        positionTest.setText(getLocalMacAddress());
+
+        UDPTestOnTime.startActionFoo(this, "a", "b");
+
+        GetData mygetData = new GetData();
+        mygetData.start();
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Message message = new Message();
+//                try{
+//                    InetAddress inetAddress = InetAddress.getLocalHost();
+////                    InetAddress inetAddress = InetAddress.getLoopbackAddress();
+//
+//                    message.obj = inetAddress;
+//
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }
+//                message.what = 1;
+//                handler.sendMessage(message);
+//            }
+//
+//        }).start();
+
+
+
+
     }
 
+
+    private String intToIp(int i) {
+        return (i & 0xFF) + "." + ((i >> 8) & 0xFF) + "." + ((i >> 16) & 0xFF) + "." + (i >> 24 & 0xFF);
+    }
+
+    //获取wifi ip 和 mac
+    public String getLocalMacAddress() {
+        //获取wifi服务
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        //判断wifi是否开启,wifi未开启时，返回的ip为0.0.0.0
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String Ip = intToIp(wifiInfo.getIpAddress());
+        String Mac = wifiInfo.getMacAddress();
+        return "WiFi->Ip:" + Ip + "\nWiFi->Mac:" + Mac;
+    }
+
+    //获取2G 3Gip
+//    public String getLocalIpAddress() {
+//        try {
+//            for (Enumeration<NetworkInterface> en = NetworkInterface
+//                    .getNetworkInterfaces();
+//                 en.hasMoreElements(); ) {
+//                NetworkInterface intf = en.nextElement();
+//                for (Enumeration<InetAddress> enumIpAddr = intf
+//                        .getInetAddresses();
+//                     enumIpAddr.hasMoreElements(); ) {
+//                    InetAddress inetAddress = enumIpAddr.nextElement();
+//                    if (!inetAddress.isLoopbackAddress()) {
+//                        return inetAddress.getHostAddress().toString();
+//                    }
+//                }
+//            }
+//        } catch (SocketException ex) {
+//        }
+//        return null;
+//    }
+
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 1:
+                    InetAddress inetAddress = (InetAddress) msg.obj;
+//                    Toast.makeText(getApplicationContext(), inetAddress.toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), inetAddress.getHostAddress(), Toast.LENGTH_SHORT).show();
+                    break;
+                case 3:
+                    Bundle bundle3 = msg.getData();
+                    Toast.makeText(getApplicationContext(), Arrays.toString(bundle3.getByteArray("data")), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -191,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
 //            baiduMap.animateMapStatus(update);
 //            isFirstLocate = false;
 
-            Toast.makeText(this, "nav to " + location.getAddrStr(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "nav to " + location.getAddrStr(), Toast.LENGTH_SHORT).show();
             isFirstLocate = false;
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
             MapStatus.Builder builder = new MapStatus.Builder();
@@ -461,5 +560,47 @@ public class MainActivity extends AppCompatActivity {
             clearOverlay(null);
             addCustomElementsDemo(bdLocation);
         }
+    }
+
+
+
+    /**
+     * get udp
+     */
+    class GetData extends Thread {
+        public DatagramSocket udpSocket;
+
+        DatagramPacket udpPacket = null;
+        byte[] data = new byte[128];
+
+        @Override
+        public void run() {
+            try {
+                udpSocket = new DatagramSocket(5858);
+                udpPacket = new DatagramPacket(data, data.length);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+
+            while (true) {
+                try {
+                    udpSocket.receive(udpPacket);
+                } catch (Exception e) {
+
+                }
+                //接收到的byte[]
+                byte[] m = Arrays.copyOf(udpPacket.getData(), udpPacket.getLength());
+
+                Message message1 = new Message();
+                message1.what = 3;
+                Bundle bundle1 = new Bundle();
+                bundle1.putByteArray("data", m);
+                message1.setData(bundle1);
+                handler.sendMessage(message1);
+            }
+//            udpSocket.close();
+
+        }
+
     }
 }
