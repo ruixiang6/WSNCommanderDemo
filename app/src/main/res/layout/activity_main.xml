@@ -8,10 +8,48 @@
         android:id="@+id/position_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         />
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/bmapView"
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"/>
+        android:layout_height="match_parent" >
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/bmapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clickable="true" />
+
+
+        <Button
+            android:id="@+id/monitor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dip"
+            android:layout_marginRight="10dip"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bg_monitor"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+        <Button
+            android:id="@+id/tomylocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dip"
+            android:layout_marginLeft="10dip"
+            android:background="@drawable/bg_my_location"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            />
+
+
+
+
+    </RelativeLayout>
+
 </LinearLayout>

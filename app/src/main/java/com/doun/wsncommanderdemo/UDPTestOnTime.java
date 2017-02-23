@@ -114,7 +114,7 @@ public class UDPTestOnTime extends IntentService {
 //                Log.e(TAG, "udpSocket.send(dataPacket);");
 
                 udpSocket.send(dataPacket);
-                sleep(5000);
+                sleep(8000);
 
             } catch (Exception e) {
                 Log.e(TAG, e.toString());

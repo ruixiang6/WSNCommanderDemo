@@ -34,10 +34,15 @@
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote"></service>
+            android:process=":remote" />
         <service
             android:name=".UDPTestOnTime"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".MonitorActivity"
+            android:label="@string/title_activity_monitor"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

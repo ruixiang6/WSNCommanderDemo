@@ -2,8 +2,10 @@ package com.doun.wsncommanderdemo;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -11,9 +13,11 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,12 +57,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.tomylocation:
+                navigateToMe();
+//                Toast.makeText(this, "tomylocation", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.monitor:
+                startActivity(new Intent(MainActivity.this, MonitorActivity.class));
+                Toast.makeText(this, "monitor", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+    }
+
     public LocationClient mLocationClient;
     private TextView positionTest;
     private MapView mapView;
     private BaiduMap baiduMap;
     private boolean isFirstLocate=true;
+    private BDLocation myLocation = null;
 
     // 普通折线，点击时改变宽度
     Polyline mPolyline;
@@ -81,8 +102,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
+
+        //隐藏ActionBar
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.hide();
+        Button monitorbutton = (Button) findViewById(R.id.monitor);
+        monitorbutton.setOnClickListener(this);
+        Button mylocationbutton = (Button) findViewById(R.id.tomylocation);
+        mylocationbutton.setOnClickListener(this);
 
         //自定位信息对象
         mLocationClient = new LocationClient(getApplicationContext());
@@ -117,8 +147,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 初始化全局 bitmap 信息，不用时及时 recycle
-        bdA = BitmapDescriptorFactory.fromResource(R.drawable.icon_marka);
-        bdB = BitmapDescriptorFactory.fromResource(R.drawable.icon_markb);
+        bdA = BitmapDescriptorFactory.fromResource(R.drawable.strawberry_pic);
+        bdB = BitmapDescriptorFactory.fromResource(R.drawable.watermelon_pic);
 
 
         baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
@@ -135,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (marker == mMarkerD) {
                     button.setText("ID：112\n频点：258K\n时隙：215\n经纬度：N31.3860 E121.2453");
                 }
+                button.setTextColor(Color.WHITE);
                 button.setBackgroundColor( Color.argb(180,79,79,79) );
                 button.setWidth( 300 );
                 listener = new InfoWindow.OnInfoWindowClickListener() {
@@ -280,9 +311,15 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient.setLocOption(option);
     }
 
+    private void navigateToMe(){
+        if (myLocation != null){
+            navigateTo(myLocation);
+        }
+    }
+
     //显示location所在区域
     private void navigateTo(BDLocation location){
-        if (isFirstLocate){
+
 //            LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
 //            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
 //            baiduMap.animateMapStatus(update);
@@ -291,13 +328,12 @@ public class MainActivity extends AppCompatActivity {
 //            isFirstLocate = false;
 
 //            Toast.makeText(this, "nav to " + location.getAddrStr(), Toast.LENGTH_SHORT).show();
-            isFirstLocate = false;
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
             MapStatus.Builder builder = new MapStatus.Builder();
             builder.target(ll).zoom(13.0f);
             baiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 
-        }
+
         MyLocationData.Builder locationBuilder = new MyLocationData.Builder();
         locationBuilder.latitude(location.getLatitude());
         locationBuilder.longitude(location.getLongitude());
@@ -312,17 +348,21 @@ public class MainActivity extends AppCompatActivity {
      */
     public void addCustomElementsDemo(BDLocation mystation) {
         //定义坐标点
-        LatLng p111 = new LatLng(mystation.getLatitude(), mystation.getLongitude());
+        LatLng p111 = new LatLng(mystation.getLatitude()+0.2, mystation.getLongitude());
         LatLng p211 = new LatLng(mystation.getLatitude()+0.1, mystation.getLongitude());
         LatLng p311 = new LatLng(mystation.getLatitude(), mystation.getLongitude()+0.1);
         LatLng p411 = new LatLng(mystation.getLatitude()-0.1, mystation.getLongitude());
 
         // 添加文字标示
         List<OverlayOptions> overlayList = new ArrayList<OverlayOptions>();
-        overlayList.add(new TextOptions().bgColor(0xAA000000).fontSize(48).fontColor(0xFFFFFFFF).text("设备A").position(p111));
-        overlayList.add(new TextOptions().bgColor(0xAA000000).fontSize(48).fontColor(0xFFFFFFFF).text("设备B").position(p211));
-        overlayList.add(new TextOptions().bgColor(0xAA000000).fontSize(48).fontColor(0xFFFFFFFF).text("设备C").position(p311));
-        overlayList.add(new TextOptions().bgColor(0xAA000000).fontSize(48).fontColor(0xFFFFFFFF).text("设备D").position(p411));
+        overlayList.add(new TextOptions().bgColor(0x00000000).typeface(Typeface.DEFAULT_BOLD)
+                .fontSize(40).fontColor(0xFF000000).text("                设备A").position(p111));
+        overlayList.add(new TextOptions().bgColor(0x00000000).typeface(Typeface.DEFAULT_BOLD)
+                .fontSize(40).fontColor(0xFF000000).text("                设备B").position(p211));
+        overlayList.add(new TextOptions().bgColor(0x00000000).typeface(Typeface.DEFAULT_BOLD)
+                .fontSize(40).fontColor(0xFF000000).text("                设备C").position(p311));
+        overlayList.add(new TextOptions().bgColor(0x00000000).typeface(Typeface.DEFAULT_BOLD)
+                .fontSize(40).fontColor(0xFF000000).text("                设备D").position(p411));
         baiduMap.addOverlays(overlayList);
 
         // 添加多纹理分段的折线绘制
@@ -378,15 +418,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         //增加图标
-        MarkerOptions ooA = new MarkerOptions().position(p111).icon(bdA).zIndex(9).draggable(true);
-        // 掉下动画
-        //ooA.animateType(MarkerOptions.MarkerAnimateType.grow);
+        MarkerOptions ooA = new MarkerOptions().position(p111).icon(bdA).anchor(0.7f, 0.5f);
+//        ooA.animateType(MarkerOptions.MarkerAnimateType.grow);// 掉下动画
         mMarkerA = (Marker) (baiduMap.addOverlay(ooA));
-        MarkerOptions ooB = new MarkerOptions().position(p211).icon(bdA).zIndex(9).draggable(true);
+        MarkerOptions ooB = new MarkerOptions().position(p211).icon(bdA).anchor(0.7f, 0.5f);
         mMarkerB = (Marker) (baiduMap.addOverlay(ooB));
-        MarkerOptions ooC = new MarkerOptions().position(p311).icon(bdB).zIndex(9).draggable(true);
+        MarkerOptions ooC = new MarkerOptions().position(p311).icon(bdB).anchor(0.7f, 0.5f);
         mMarkerC = (Marker) (baiduMap.addOverlay(ooC));
-        MarkerOptions ooD = new MarkerOptions().position(p411).icon(bdB).zIndex(9).draggable(true);
+        MarkerOptions ooD = new MarkerOptions().position(p411).icon(bdB).anchor(0.7f, 0.5f);
         mMarkerD = (Marker) (baiduMap.addOverlay(ooD));
 
 
@@ -509,6 +548,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(this, "必须同意", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
+
                         }
                     }
                 } else {
@@ -536,9 +576,17 @@ public class MainActivity extends AppCompatActivity {
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation
                     ||bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) {
             }
-            navigateTo(bdLocation);
+            if (myLocation==null){
+                myLocation = new BDLocation();
+            }
+            myLocation.setLatitude(bdLocation.getLatitude());
+            myLocation.setLongitude(bdLocation.getLongitude());
+            if (isFirstLocate) {
+                navigateToMe();
+                isFirstLocate = false;
+            }
 
-            //显示文字信息
+                //显示文字信息
             StringBuilder currentPosition = new StringBuilder();
             currentPosition.append("纬度：").append(bdLocation.getLatitude()).append(" ");
             currentPosition.append("经度：").append(bdLocation.getLongitude()).append("\n");
