@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.monitor:
                 startActivity(new Intent(MainActivity.this, MonitorActivity.class));
-                Toast.makeText(this, "monitor", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "monitor", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -180,34 +180,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-//        Toast.makeText(getApplicationContext(), getLocalMacAddress(), Toast.LENGTH_SHORT).show();
-//        positionTest.setText(getLocalMacAddress());
-
-        UDPTestOnTime.startActionFoo(this, "a", "b");
-
-        GetData mygetData = new GetData();
-        mygetData.start();
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Message message = new Message();
-//                try{
-//                    InetAddress inetAddress = InetAddress.getLocalHost();
-////                    InetAddress inetAddress = InetAddress.getLoopbackAddress();
-//
-//                    message.obj = inetAddress;
-//
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//                message.what = 1;
-//                handler.sendMessage(message);
-//            }
-//
-//        }).start();
-
-
 
 
     }
@@ -231,46 +203,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return "WiFi->Ip:" + Ip + "\nWiFi->Mac:" + Mac;
     }
 
-    //获取2G 3Gip
-//    public String getLocalIpAddress() {
-//        try {
-//            for (Enumeration<NetworkInterface> en = NetworkInterface
-//                    .getNetworkInterfaces();
-//                 en.hasMoreElements(); ) {
-//                NetworkInterface intf = en.nextElement();
-//                for (Enumeration<InetAddress> enumIpAddr = intf
-//                        .getInetAddresses();
-//                     enumIpAddr.hasMoreElements(); ) {
-//                    InetAddress inetAddress = enumIpAddr.nextElement();
-//                    if (!inetAddress.isLoopbackAddress()) {
-//                        return inetAddress.getHostAddress().toString();
-//                    }
-//                }
-//            }
-//        } catch (SocketException ex) {
-//        }
-//        return null;
-//    }
-
-
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what){
-                case 1:
-                    InetAddress inetAddress = (InetAddress) msg.obj;
-//                    Toast.makeText(getApplicationContext(), inetAddress.toString(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), inetAddress.getHostAddress(), Toast.LENGTH_SHORT).show();
-                    break;
-                case 3:
-                    Bundle bundle3 = msg.getData();
-                    Toast.makeText(getApplicationContext(), Arrays.toString(bundle3.getByteArray("data")), Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -611,44 +543,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-    /**
-     * get udp
-     */
-    class GetData extends Thread {
-        public DatagramSocket udpSocket;
-
-        DatagramPacket udpPacket = null;
-        byte[] data = new byte[128];
-
-        @Override
-        public void run() {
-            try {
-                udpSocket = new DatagramSocket(5858);
-                udpPacket = new DatagramPacket(data, data.length);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-
-            while (true) {
-                try {
-                    udpSocket.receive(udpPacket);
-                } catch (Exception e) {
-
-                }
-                //接收到的byte[]
-                byte[] m = Arrays.copyOf(udpPacket.getData(), udpPacket.getLength());
-
-                Message message1 = new Message();
-                message1.what = 3;
-                Bundle bundle1 = new Bundle();
-                bundle1.putByteArray("data", m);
-                message1.setData(bundle1);
-                handler.sendMessage(message1);
-            }
-//            udpSocket.close();
-
-        }
-
-    }
 }

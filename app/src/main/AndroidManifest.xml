@@ -30,6 +30,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MonitorActivity"
+            android:label="@string/title_activity_monitor"
+            android:theme="@style/AppTheme" />
 
         <service
             android:name="com.baidu.location.f"
@@ -38,11 +42,10 @@
         <service
             android:name=".UDPTestOnTime"
             android:exported="false" />
-
-        <activity
-            android:name=".MonitorActivity"
-            android:label="@string/title_activity_monitor"
-            android:theme="@style/AppTheme"></activity>
+        <service
+            android:name=".FrameDataRecService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
