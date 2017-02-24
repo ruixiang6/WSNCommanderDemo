@@ -118,7 +118,7 @@ public class UDPTestOnTime extends IntentService {
                 dataPacket.setAddress(InetAddress.getByName("127.0.0.1"));//202.11.4.67测试IP
 
                 udpSocketSend.send(dataPacket);
-                sleep(8000);
+                sleep(100);
 
             } catch (Exception e) {
                 Log.e(TAG, e.toString());

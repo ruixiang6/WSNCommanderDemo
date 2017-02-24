@@ -6,16 +6,18 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="com.doun.wsncommanderdemo.MonitorActivity">
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
+        android:background="@color/colorPrimaryDark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"/>
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/text_ip_show"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/RecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

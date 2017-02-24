@@ -64,6 +64,7 @@ public class FrameDataRecService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand");
+        receiveOnTime = true;
         new Thread(new Runnable() {
             @Override
             public void run() {

@@ -21,13 +21,17 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
     static class ViewHolder extends RecyclerView.ViewHolder {
         View framedataView;
         ImageView framedataImage;
-        TextView framedataName;
+        TextView framedataTime;
+        TextView framedataData;
+        TextView framedataLength;
 
         public ViewHolder(View view) {
             super(view);
             framedataView = view;
             framedataImage = (ImageView) view.findViewById(R.id.framedata_image);
-            framedataName = (TextView) view.findViewById(R.id.framedata_name);
+            framedataTime = (TextView) view.findViewById(R.id.framedata_time);
+            framedataData = (TextView) view.findViewById(R.id.framedata_data);
+            framedataLength = (TextView) view.findViewById(R.id.framedata_length);
         }
     }
 
@@ -44,7 +48,7 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 FrameData FrameData = mFrameDataList.get(position);
-                Toast.makeText(v.getContext(), "you clicked view " + FrameData.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "you clicked view " + FrameData.getData(), Toast.LENGTH_SHORT).show();
             }
         });
         holder.framedataImage.setOnClickListener(new View.OnClickListener() {
@@ -52,7 +56,7 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 FrameData FrameData = mFrameDataList.get(position);
-                Toast.makeText(v.getContext(), "you clicked image " + FrameData.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "you clicked image " + FrameData.getData(), Toast.LENGTH_SHORT).show();
             }
         });
         return holder;
@@ -62,7 +66,9 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position) {
         FrameData FrameData = mFrameDataList.get(position);
         holder.framedataImage.setImageResource(FrameData.getImageId());
-        holder.framedataName.setText(FrameData.getName());
+        holder.framedataTime.setText(FrameData.getTime());
+        holder.framedataData.setText(FrameData.getData());
+        holder.framedataLength.setText(FrameData.getLength());
     }
 
     @Override
