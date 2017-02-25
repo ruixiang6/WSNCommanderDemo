@@ -7,12 +7,12 @@ package com.doun.wsncommanderdemo;
 public class FrameData {
 
     private String time;
-    private String data;
+    private byte[] data;
     private String length;
 
     private int imageId;
 
-    public FrameData(String time, String data, String length, int imageId) {
+    public FrameData(String time, byte[] data, String length, int imageId) {
         this.time = time;
         this.data = data;
         this.length = length;
@@ -27,9 +27,10 @@ public class FrameData {
         return time;
     }
 
-    public String getData() {
+    public byte[] getData() {
         return data;
     }
+
     public int getImageId() {
         return imageId;
     }

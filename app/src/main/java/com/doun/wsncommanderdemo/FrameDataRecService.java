@@ -23,7 +23,7 @@ public class FrameDataRecService extends Service {
 
     public DatagramSocket udpSocketRec = null;
     DatagramPacket udpPacket = null;
-    byte[] data = new byte[128];
+    byte[] data = new byte[2000];
 
     UDPTestOnTimeBinder mBinder=new UDPTestOnTimeBinder();
 

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,7 +49,7 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 FrameData FrameData = mFrameDataList.get(position);
-                Toast.makeText(v.getContext(), "you clicked view " + FrameData.getData(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), byte2hex(FrameData.getData()), Toast.LENGTH_LONG).show();
             }
         });
         holder.framedataImage.setOnClickListener(new View.OnClickListener() {
@@ -56,7 +57,7 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 FrameData FrameData = mFrameDataList.get(position);
-                Toast.makeText(v.getContext(), "you clicked image " + FrameData.getData(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "you clicked image " + byte2hex(FrameData.getData()), Toast.LENGTH_LONG).show();
             }
         });
         return holder;
@@ -64,11 +65,12 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FrameData FrameData = mFrameDataList.get(position);
-        holder.framedataImage.setImageResource(FrameData.getImageId());
-        holder.framedataTime.setText(FrameData.getTime());
-        holder.framedataData.setText(FrameData.getData());
-        holder.framedataLength.setText(FrameData.getLength());
+        FrameData frameData = mFrameDataList.get(position);
+        holder.framedataImage.setImageResource(frameData.getImageId());
+        holder.framedataTime.setText(frameData.getTime());
+        holder.framedataData.setText(byte2hex(frameData.getData()));
+//        holder.framedataData.setText(Arrays.toString(frameData.getData()));
+        holder.framedataLength.setText(frameData.getLength());
     }
 
     @Override
@@ -76,5 +78,20 @@ public class FrameDataAdapter extends RecyclerView.Adapter<FrameDataAdapter.View
         return mFrameDataList.size();
     }
 
-    
+
+    private static String byte2hex(byte [] buffer){
+        String h = "";
+
+        for(int i = 0; i < buffer.length; i++){
+            String temp = Integer.toHexString(buffer[i] & 0xFF);
+            if(temp.length() == 1){
+                temp = "0" + temp;
+            }
+            h = h + " "+ temp;
+        }
+
+        return h;
+
+    }
+
 }

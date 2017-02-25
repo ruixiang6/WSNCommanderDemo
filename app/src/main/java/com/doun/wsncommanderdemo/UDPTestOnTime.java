@@ -9,6 +9,7 @@ import android.util.Log;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Random;
 
 import static java.lang.Thread.sleep;
 
@@ -20,8 +21,6 @@ import static java.lang.Thread.sleep;
  * helper methods.
  */
 public class UDPTestOnTime extends IntentService {
-
-
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_SEND = "com.doun.wsncommanderdemo.action.SEND";
@@ -104,21 +103,25 @@ public class UDPTestOnTime extends IntentService {
         DatagramPacket dataPacket = null;
         try {
             udpSocketSend = new DatagramSocket();
-
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
+
+        Random random = new Random();
+        getData = new byte[1000];
         while (sendOnTime) {
             try {
-                getData = new byte[]{'a','b'};
-                dataPacket = new DatagramPacket(getData, getData.length);
-                dataPacket.setData(getData);
-                dataPacket.setLength(getData.length);
+                random.nextBytes(getData);
+                int length = random.nextInt(999) + 1;
+                dataPacket = new DatagramPacket(getData, length);
+//                dataPacket.setData(getData);
+//                dataPacket.setLength(getData.length);
                 dataPacket.setPort(port);
                 dataPacket.setAddress(InetAddress.getByName("127.0.0.1"));//202.11.4.67测试IP
 
                 udpSocketSend.send(dataPacket);
-                sleep(100);
+                int timeSleep = random.nextInt(100) + 1;
+                sleep(10*timeSleep);
 
             } catch (Exception e) {
                 Log.e(TAG, e.toString());

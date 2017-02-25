@@ -10,7 +10,6 @@ import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -31,16 +30,19 @@ import java.util.Random;
 public class MonitorActivity extends AppCompatActivity implements View.OnClickListener{
 
     private final String TAG = "MonitorActivity";
-    private final int port = 5858;
-    TextView textView;
-    FrameDataRecService.UDPTestOnTimeBinder serviceBinder=null;
-    private boolean receiving = true;
+    private final int PORT = 5858;
+    TextView mTextView;
+    FrameDataRecService.UDPTestOnTimeBinder mServiceBinder =null;
+    private boolean mReceiving = true;
+    FloatingActionButton mFabPlay = null;
+    FloatingActionButton mFabBottom = null;
+    boolean mScrollBottom = true;
 
     ServiceConnection serviceConnection = new ServiceConnection(){
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            serviceBinder = (FrameDataRecService.UDPTestOnTimeBinder)service;
-            serviceBinder.setUIHandle(handler);
+            mServiceBinder = (FrameDataRecService.UDPTestOnTimeBinder)service;
+            mServiceBinder.setUIHandle(handler);
         }
 
         @Override
@@ -60,22 +62,23 @@ public class MonitorActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_monitor);
 
         //获取本地ip
-        textView = (TextView)findViewById(R.id.text_ip_show);
+        mTextView = (TextView)findViewById(R.id.text_ip_show);
         String str = getLocalIpAddress();
         if (str!=null)
         {
-            textView.setText("本机UDP接收地址："+str+" : "+port);
+            mTextView.setText("本机UDP接收地址："+str+" : "+ PORT);
         }
 
         //浮动按钮
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
-
+        mFabPlay = (FloatingActionButton) findViewById(R.id.fab_play);
+        mFabPlay.setOnClickListener(this);
+        mFabBottom = (FloatingActionButton) findViewById(R.id.fab_bottom);
+        mFabBottom.setOnClickListener(this);
+        mFabBottom.hide();
 
         //初始化列表
-        initFruits();
+//        initFruits();
         recyclerView = (RecyclerView) findViewById(R.id.RecyclerView);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
         adapter = new FrameDataAdapter(fruitList);
         recyclerView.setAdapter(adapter);
@@ -109,9 +112,13 @@ public class MonitorActivity extends AppCompatActivity implements View.OnClickLi
                 Log.i("onScrollStateChanged", "totalItemCount" + totalItemCount);
                 if (visibleItemCount > 0 && newState == RecyclerView.SCROLL_STATE_IDLE
                         && lastVisibleItemPosition == totalItemCount - 1) {
+                    mScrollBottom = true;
+                    mFabBottom.hide();
                     Toast.makeText(MonitorActivity.this, "到底了哦", Toast.LENGTH_SHORT).show();
+                }else {
+                    mScrollBottom = false;
+                    mFabBottom.show();
                 }
-
             }
 
             @Override
@@ -152,16 +159,16 @@ public class MonitorActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initFruits() {
         for (int i = 0; i < 10; i++) {
-            String str = getRandomLengthName("Banana");
+            byte str[] = new byte[]{11,22};
+            byte str1[] = new byte[]{34,22};
+            byte str2[] = new byte[]{26,44};
             SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd    hh:mm:ss");
             String date = sDateFormat.format(new java.util.Date());
-            FrameData banana = new FrameData(date, str, ""+str.length(),R.drawable.banana_pic);
+            FrameData banana = new FrameData(date, str, ""+str.length,R.drawable.banana_pic);
             fruitList.add(banana);
-            String str1 = getRandomLengthName("Watermelon");
-            FrameData watermelon = new FrameData(date, str1, ""+str1.length(), R.drawable.watermelon_pic);
+            FrameData watermelon = new FrameData(date, str1, ""+str1.length, R.drawable.watermelon_pic);
             fruitList.add(watermelon);
-            String str2 = getRandomLengthName("Strawberry");
-            FrameData strawberry = new FrameData(date, str2, ""+str2.length(), R.drawable.strawberry_pic);
+            FrameData strawberry = new FrameData(date, str2, ""+str2.length, R.drawable.strawberry_pic);
             fruitList.add(strawberry);
         }
     }
@@ -184,13 +191,30 @@ public class MonitorActivity extends AppCompatActivity implements View.OnClickLi
                 case 1:
                     Bundle bundle3 = msg.getData();
 //                    Toast.makeText(getApplicationContext(), Arrays.toString(bundle3.getByteArray("data")), Toast.LENGTH_SHORT).show();
-                    SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd    hh:mm:ss");
+                    SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd    hh:mm:ss.SSS");
                     String date = sDateFormat.format(new java.util.Date());
-                    String str = Arrays.toString(bundle3.getByteArray("data"));
-                    FrameData banana = new FrameData(date, str, ""+bundle3.getByteArray("data").length,R.drawable.banana_pic);
+                    int length = bundle3.getByteArray("data").length;
+                    int id = length%3;
+                    int imageID = 0;
+                    switch (id){
+                        case 0:
+                            imageID = R.drawable.banana_pic;
+                            break;
+                        case 1:
+                            imageID = R.drawable.strawberry_pic;
+                            break;
+                        case 2:
+                            imageID = R.drawable.watermelon_pic;
+                            break;
+                        default:
+                            break;
+                    }
+                    FrameData banana = new FrameData(date, bundle3.getByteArray("data"), ""+length, imageID);
                     fruitList.add(banana);
                     adapter.notifyItemInserted(fruitList.size()-1);
-                    recyclerView.scrollToPosition(fruitList.size()-1);
+                    if (mScrollBottom == true){
+                        recyclerView.scrollToPosition(fruitList.size()-1);
+                    }
 
                     break;
                 case 2:
@@ -240,16 +264,23 @@ public class MonitorActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.fab:
-                if (receiving == true){
-                    serviceBinder.stopReceive();
-                    receiving = false;
+            case R.id.fab_play:
+                if (mReceiving == true){
+                    mServiceBinder.stopReceive();
+                    mReceiving = false;
+                    mFabPlay.setImageResource(android.R.drawable.ic_media_play);
                     Snackbar.make(view, "UDP接收已停止", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
                 } else {
                     startService(new Intent(this, FrameDataRecService.class));
-                    receiving = true;
+                    mReceiving = true;
+                    mFabPlay.setImageResource(android.R.drawable.ic_media_pause);
                     Snackbar.make(view, "UDP接收已开始", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
                 }
+                break;
+            case R.id.fab_bottom:
+                recyclerView.scrollToPosition(fruitList.size()-1);
+                mScrollBottom = true;
+                mFabBottom.hide();
                 break;
             default:
                 break;
